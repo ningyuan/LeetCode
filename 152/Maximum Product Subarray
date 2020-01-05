@@ -1,0 +1,132 @@
+给定一个整数数组 nums ，找出一个序列中乘积最大的连续子序列（该序列至少包含一个数）。
+
+示例 1:
+输入: [2,3,-2,4]
+输出: 6
+解释: 子数组 [2,3] 有最大乘积 6。
+
+示例 2:
+输入: [-2,0,-1]
+输出: 0
+解释: 结果不能为 2, 因为 [-2,-1] 不是子数组。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/maximum-product-subarray
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public int maxProduct(int[] nums) {
+        if(nums == null || nums.length == 0){
+            return 0;
+        }
+        
+        /*
+         * [1 2 -3 4 0 1 2 0 1 -1 2 -2 4]
+         * [1 2 -3]   [1 2] [1 -1 2 -2 4]
+         */
+        List<Integer> indexOfZero = new ArrayList<Integer>();
+        
+        
+        for(int i = 0; i < nums.length; i++){
+            if(nums[i] == 0){
+                indexOfZero.add(i);
+            }
+        }
+        
+        if(indexOfZero.size() == 0){
+            return maxProductWithoutZero(nums, 0, nums.length);
+        }
+        else{
+            // there is 0 in nums
+            int max = 0;
+            int ret = 0;
+            
+            // the 1st segment without 0s
+            ret = maxProductWithoutZero(nums, 0, indexOfZero.get(0));
+            if(ret > max){
+                max = ret;
+            }
+            
+            // the following segment without 0s
+            int i = 1;
+            for( ; i < indexOfZero.size(); i++){
+                ret = maxProductWithoutZero(nums, indexOfZero.get(i-1)+1, indexOfZero.get(i));
+                
+                if(ret > max){
+                    max = ret;
+                }
+            }
+            
+            // the last segment without 0s
+            ret = maxProductWithoutZero(nums, indexOfZero.get(i-1)+1, nums.length);
+            if(ret > max){
+                return ret;
+            }
+            else{
+                return max;
+            }
+        }
+    }
+    
+    private int maxProductWithoutZero(int[] nums, int start, int end){
+            //System.out.println("start: "+start+"    end: "+end);
+        if(start >= end){
+            return 0;
+        }
+        
+        List<Integer> indexOfNegative = new ArrayList<Integer>();
+        
+        int ret = 1;
+        
+        for(int i = start; i < end; i++){
+            if(nums[i] < 0){
+                indexOfNegative.add(i);
+                    //System.out.println("add index: "+i);
+            }
+            ret = ret * nums[i];
+        }
+        
+        // there are even number of negative numbers
+        if(indexOfNegative.size() % 2 == 0){
+            return ret;
+        }
+        // there are odd number of negative numbers
+        else{
+            int max;
+            
+            // [-1 1]
+            if(start >= indexOfNegative.get(indexOfNegative.size()-1)){
+                max = nums[indexOfNegative.size()-1];
+            }
+            //[1 -1]
+            else{
+                max = 1;
+                
+                for(int i = start; i < indexOfNegative.get(indexOfNegative.size()-1); i++){
+                    max = max * nums[i];
+                }
+            }
+                //System.out.println("i: "+start+"    j: "+indexOfNegative.get(indexOfNegative.size()-1)+" ret: "+max);
+            
+            // [1 -1]
+            if(indexOfNegative.get(0)+1 >= end){
+                ret = nums[indexOfNegative.get(0)];
+            }
+            else{
+                ret = 1;
+                
+                for(int i = indexOfNegative.get(0)+1; i < end; i++){
+                    ret = ret * nums[i];
+                }
+                    //System.out.println("i: "+(indexOfNegative.get(0)+1)+"    j: "+end+" ret: "+ret);
+            }
+            
+            if(ret > max){
+                return ret;
+            }
+            else{
+                return max;
+            }
+        }
+    }
+}
