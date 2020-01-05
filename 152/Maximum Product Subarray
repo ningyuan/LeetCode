@@ -26,7 +26,6 @@ class Solution {
          */
         List<Integer> indexOfZero = new ArrayList<Integer>();
         
-        
         for(int i = 0; i < nums.length; i++){
             if(nums[i] == 0){
                 indexOfZero.add(i);
@@ -101,20 +100,17 @@ class Solution {
             //[1 -1]
             else{
                 max = 1;
-                
                 for(int i = start; i < indexOfNegative.get(indexOfNegative.size()-1); i++){
                     max = max * nums[i];
                 }
             }
                 //System.out.println("i: "+start+"    j: "+indexOfNegative.get(indexOfNegative.size()-1)+" ret: "+max);
-            
             // [1 -1]
             if(indexOfNegative.get(0)+1 >= end){
                 ret = nums[indexOfNegative.get(0)];
             }
             else{
                 ret = 1;
-                
                 for(int i = indexOfNegative.get(0)+1; i < end; i++){
                     ret = ret * nums[i];
                 }
