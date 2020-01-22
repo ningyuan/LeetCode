@@ -1,0 +1,79 @@
+给定一个整数数组，其中第 i 个元素代表了第 i 天的股票价格 。​
+
+设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:
+
+你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。
+示例:
+
+输入: [1,2,3,0,2]
+输出: 3 
+解释: 对应的交易状态为: [买入, 卖出, 冷冻期, 买入, 卖出]
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    private int[][] maxProfit; 
+    
+    public int maxProfit(int[] prices) {
+        if(prices == null || prices.length < 2){
+            return 0;
+        }
+        
+        maxProfit = new int[prices.length][prices.length];
+        for(int i = 0; i < prices.length; i++){
+            for(int j = 0; j < prices.length; j++){
+                if(i >= j){
+                    maxProfit[i][j] = 0;
+                }
+                else if(i == j-1){
+                    maxProfit[i][j] = prices[j] >= prices[i] ? prices[j] - prices[i] : 0;
+                }
+                else{
+                   maxProfit[i][j] = -1; 
+                }
+            }
+        }
+        
+        /*
+         * [1,2,4,9]
+         * max = {nums[length-1]-nums[0], max[2,4,9], max[1]+max[4,9], max[1,2]+max[9], max[1,2,4]}
+         *
+         */
+        int ret = prices[prices.length-1] >= prices[0] ? prices[prices.length-1] - prices[0] : 0;
+        for(int i = 0; i < prices.length; i++){
+            ret = Math.max(ret, maxProfitFromIToJ(prices, 0, i-1, maxProfit)+maxProfitFromIToJ(prices, i+1, prices.length-1, maxProfit));
+        }
+        return ret;
+    }
+    
+    private int maxProfitFromIToJ(int[] prices, int i, int j, int[][] maxProfit){
+        if(i > prices.length - 1 || j < 0){
+            return 0;
+        }
+        
+        if(maxProfit[i][j] != -1){
+            return maxProfit[i][j];
+        }
+        else{
+            if(i >= j){
+                maxProfit[i][j] = 0;
+                return 0;
+            }
+            
+            if(i == j - 1){
+                maxProfit[i][j] = prices[j] >= prices[i] ? prices[j] - prices[i] : 0;
+                return maxProfit[i][j];
+            }
+            
+            int ret = prices[j] >= prices[i] ? prices[j] - prices[i] : 0;
+            for(int m = i; m <= j; m++){
+                ret = Math.max(ret, maxProfitFromIToJ(prices, i, m-1, maxProfit)+maxProfitFromIToJ(prices, m+1, j, maxProfit));
+            }
+            maxProfit[i][j] = ret;
+            return ret;
+        }
+    }
+}
