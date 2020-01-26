@@ -58,16 +58,6 @@ class Solution {
             return maxProfit[i][j];
         }
         else{
-            if(i >= j){
-                maxProfit[i][j] = 0;
-                return 0;
-            }
-            
-            if(i == j - 1){
-                maxProfit[i][j] = prices[j] >= prices[i] ? prices[j] - prices[i] : 0;
-                return maxProfit[i][j];
-            }
-            
             int ret = prices[j] >= prices[i] ? prices[j] - prices[i] : 0;
             for(int m = i; m <= j; m++){
                 ret = Math.max(ret, maxProfitFromIToJ(prices, i, m-1, maxProfit)+maxProfitFromIToJ(prices, m+1, j, maxProfit));
