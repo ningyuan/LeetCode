@@ -1,0 +1,154 @@
+给定一个非空二叉树，返回其最大路径和。
+
+本题中，路径被定义为一条从树中任意节点出发，达到任意节点的序列。该路径至少包含一个节点，且不一定经过根节点。路径和为路径上节点值之和。
+
+示例 1:
+
+输入: [1,2,3]
+
+       1
+      / \
+     2   3
+
+输出: 6
+示例 2:
+
+输入: [-10,9,20,null,null,15,7]
+
+   -10
+   / \
+  9  20
+    /  \
+   15   7
+
+输出: 42
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/binary-tree-maximum-path-sum
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    int maxSum = Integer.MIN_VALUE;
+    
+    public int maxPathSum(TreeNode root) {
+        int[] maxPathSum = maxPathSumHelper(root);
+        
+        int temp = Math.max(maxPathSum[0], maxPathSum[1]);
+        
+        return Math.max(maxSum, temp);
+    }
+    
+    private int[] maxPathSumHelper(TreeNode root){
+        /*
+         * ret[0]: max path sum which dose not contain the root
+         * ret[1]: max path sum which contains the root (path only in one of the subtree of the root)
+         */
+        int[] ret = new int[2];
+        
+        /*
+         *      -3
+         *
+         */
+        if(root.left == null && root.right == null){
+            if(root.val > maxSum){
+                maxSum = root.val;
+            }
+            
+            ret[0] = root.val;
+            ret[1] = root.val;
+                //System.out.println("node "+root.val+" ["+ret[0]+" "+ret[1]+"]");
+            return ret;
+        }
+        
+        int[] maxPathInLeft = null;
+        if(root.left != null){
+            maxPathInLeft = maxPathSumHelper(root.left);
+        }
+        
+        int[] maxPathInRight = null;
+        if(root.right != null){
+            maxPathInRight = maxPathSumHelper(root.right);
+        }
+        
+        /*
+         *        -3
+         *  null       -2
+         */
+        if(maxPathInLeft == null){
+            ret[0] = Math.max(maxPathInRight[0], maxPathInRight[1]);
+            
+            if(maxPathInRight[1] > 0){
+                ret[1] = maxPathInRight[1];
+                
+                int possibleMaxAtRoot = root.val;
+                possibleMaxAtRoot += ret[1];
+                if(possibleMaxAtRoot > maxSum){
+                    maxSum = possibleMaxAtRoot;
+                }
+            }
+        }
+        /*
+         *      -3
+         * -1       null  
+         */
+        else if(maxPathInRight == null){
+            ret[0] = Math.max(maxPathInLeft[0], maxPathInLeft[1]);
+            
+            if(maxPathInLeft[1] > 0){
+                ret[1] = maxPathInLeft[1];
+                
+                int possibleMaxAtRoot = root.val;
+                possibleMaxAtRoot += ret[1];
+                if(possibleMaxAtRoot > maxSum){
+                    maxSum = possibleMaxAtRoot;
+                }
+            }
+        }
+        /*
+         *     -3
+         *  0      -2
+         */
+        else{
+            int temp1 = Math.max(maxPathInLeft[0], maxPathInLeft[1]);
+            int temp2 = Math.max(maxPathInRight[0], maxPathInRight[1]);
+            
+            ret[0] = Math.max(temp1, temp2);
+            
+            /*
+             * calculate a possible sum ended in root (path can come from both subtrees of the root)
+             *
+             */ 
+            int possibleMaxAtRoot = root.val;
+            int temp = 0;
+            if(maxPathInLeft[1] > 0){
+                possibleMaxAtRoot += maxPathInLeft[1];
+                temp = maxPathInLeft[1];
+            }
+            if(maxPathInRight[1] > 0){
+                possibleMaxAtRoot += maxPathInRight[1];
+                if(maxPathInRight[1] > temp){
+                    temp = maxPathInRight[1];
+                }
+            }
+            if(possibleMaxAtRoot > maxSum){
+                maxSum = possibleMaxAtRoot;
+            }
+            
+            ret[1] = temp;
+        }
+        
+        ret[1] += root.val;
+    
+            //System.out.println("node "+root.val+" ["+ret[0]+" "+ret[1]+"]");
+        return ret;
+    }
+}
