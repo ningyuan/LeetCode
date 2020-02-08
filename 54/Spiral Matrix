@@ -1,0 +1,125 @@
+Given a matrix of m x n elements (m rows, n columns), return all elements of the matrix in spiral order.
+
+Example 1:
+
+Input:
+[
+ [ 1, 2, 3 ],
+ [ 4, 5, 6 ],
+ [ 7, 8, 9 ]
+]
+Output: [1,2,3,6,9,8,7,4,5]
+Example 2:
+
+Input:
+[
+  [1, 2, 3, 4],
+  [5, 6, 7, 8],
+  [9,10,11,12]
+]
+Output: [1,2,3,4,8,12,11,10,9,5,6,7]
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/spiral-matrix
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> ret = new ArrayList<Integer>();
+        
+        if(matrix == null || matrix.length == 0){
+            return ret;
+        }
+        
+        /*
+         *  1    2   3
+         */
+        if(matrix.length == 1){
+            int[] row = matrix[0];
+            for(int i=0; i < row.length; i++){
+                ret.add(row[i]);
+            }
+            
+            return ret;
+        }
+        
+        /*
+         *      1
+         *      2
+         *      3
+         */
+        if(matrix[0].length == 1){
+            for(int i=0; i < matrix.length; i++){
+                ret.add(matrix[i][0]);
+            }
+            
+            return ret;
+        }
+        
+        int up = 0, right = matrix[0].length-1, down = matrix.length-1, left = 0;
+        /*
+         *  0: left to right
+         *  1: up to down
+         *  2: right to left
+         *  3: down to up
+         */
+        int state = 0;
+        
+        while(true){
+            switch(state){
+                case 0:{
+                    if(left > right){
+                        return ret;
+                    }
+                    
+                    for(int i=left; i <= right; i++){
+                        ret.add(matrix[up][i]);
+                    }
+                    
+                    up++;
+                    state = 1;
+                    break;
+                }
+                case 1:{
+                    if(up > down){
+                        return ret;
+                    }
+                    
+                    for(int i=up; i <= down; i++){
+                        ret.add(matrix[i][right]);
+                    }
+                    
+                    right--;
+                    state = 2;
+                    break;
+                }
+                case 2:{
+                    if(right < left){
+                        return ret;
+                    }
+                    
+                    for(int i=right; i >= left; i--){
+                        ret.add(matrix[down][i]);
+                    }
+                    
+                    down--;
+                    state = 3;
+                    break;
+                }
+                case 3:{
+                    if(down < up){
+                        return ret;
+                    }
+                    
+                    for(int i=down; i >= up; i--){
+                        ret.add(matrix[i][left]);
+                    }
+                    
+                    left++;
+                    state = 0;
+                    break;
+                }
+            }
+        }
+    }
+}
