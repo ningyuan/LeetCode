@@ -1,0 +1,234 @@
+Given a nested list of integers, implement an iterator to flatten it.
+
+Each element is either an integer, or a list -- whose elements may also be integers or other lists.
+
+Example 1:
+
+Input: [[1,1],2,[1,1]]
+Output: [1,1,2,1,1]
+Explanation: By calling next repeatedly until hasNext returns false, 
+             the order of elements returned by next should be: [1,1,2,1,1].
+Example 2:
+
+Input: [1,[4,[6]]]
+Output: [1,4,6]
+Explanation: By calling next repeatedly until hasNext returns false, 
+             the order of elements returned by next should be: [1,4,6].
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/flatten-nested-list-iterator
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+/**
+ * // This is the interface that allows for creating nested lists.
+ * // You should not implement it, or speculate about its implementation
+ * public interface NestedInteger {
+ *
+ *     // @return true if this NestedInteger holds a single integer, rather than a nested list.
+ *     public boolean isInteger();
+ *
+ *     // @return the single integer that this NestedInteger holds, if it holds a single integer
+ *     // Return null if this NestedInteger holds a nested list
+ *     public Integer getInteger();
+ *
+ *     // @return the nested list that this NestedInteger holds, if it holds a nested list
+ *     // Return null if this NestedInteger holds a single integer
+ *     public List<NestedInteger> getList();
+ * }
+ */
+public class NestedIterator implements Iterator<Integer> {
+    private List<NestedInteger> nestedList;
+    private List<NestedIntegerList> stack;
+    private int pos = 0;
+    
+    public NestedIterator(List<NestedInteger> nestedList) {
+        if(nestedList == null){
+            this.nestedList = new ArrayList<NestedInteger>();
+        }
+        else{
+            this.nestedList = nestedList;
+        }
+        
+        removeEmptyList();
+        
+        stack = new ArrayList<NestedIntegerList>();
+            //System.out.println("nestedList: "+this.nestedList.size());
+    }
+
+    @Override
+    public Integer next() {
+        // there is no nested list
+        if(stack.isEmpty()){
+                //System.out.println("next() stack is empty");
+            NestedInteger ni = nestedList.get(pos);
+            
+            // [1, ...]
+            if(ni.isInteger()){
+                    //System.out.println("next() root "+ni.getInteger()+" at "+pos);
+                pos++;
+                    
+                return ni.getInteger();
+            }
+            // [[1, ...], ...]
+            else{
+                // [[[1]], 2, ...]
+                ni = pushNestedListAndGetTopInteger(ni, stack);
+                
+                popNestedList(stack);
+                
+                // the nested list at pos is visited, pos++
+                // [ , 2, ...]
+                if(stack.isEmpty()){
+                    pos++;
+                }
+                
+                    //System.out.println("next() nested top "+ni.getInteger());
+                return ni.getInteger();
+            }
+        }
+        // there is a nested list in current nested integer
+        else{
+                //System.out.println("next() stack is not empty");
+            NestedIntegerList niList = stack.get(stack.size()-1);
+            NestedInteger ni = niList.list.get(niList.pos);
+            niList.pos++;
+            // [... , [[... , 1]], 2, ...]
+            if(ni.isInteger()){
+
+                popNestedList(stack);
+                
+                // the nested list at pos is visited, pos++
+                // [... ,  2, ...]
+                if(stack.isEmpty()){
+                    pos++;
+                }
+                    //System.out.println("next() nested "+ni.getInteger());
+                return ni.getInteger();
+            }
+            else{
+                // [... , [[1]], 2, ...]
+                ni = pushNestedListAndGetTopInteger(ni, stack);
+                
+                popNestedList(stack);
+                
+                // the nested list at pos is visited, pos++
+                // [... ,  2, ...]
+                if(stack.isEmpty()){
+                    pos++;
+                }
+                
+                    //System.out.println("next() nested top "+ni.getInteger());
+                return ni.getInteger();
+            }
+        }    
+    }
+        
+    @Override
+    public boolean hasNext() {
+            //System.out.println("hasNext() "+(pos < nestedList.size()));
+        return pos < nestedList.size();
+    }
+    
+    private NestedInteger pushNestedListAndGetTopInteger(NestedInteger root, List<NestedIntegerList> stack){
+        
+        while(true){
+            NestedIntegerList niList = new NestedIntegerList(root);
+            stack.add(niList);
+            niList.pos++;
+            
+            root = niList.list.get(0);
+        
+            if(root.isInteger()){
+                    return root;
+            }
+        }
+    }
+    
+    private void popNestedList(List<NestedIntegerList> stack){
+        
+        NestedIntegerList niList = stack.get(stack.size()-1);
+        
+        while(niList.pos >= niList.size){
+            stack.remove(stack.size()-1);
+                    
+            if(!stack.isEmpty()){
+                niList = stack.get(stack.size()-1);
+            }
+            else{
+                return;
+            }
+        }
+    }
+     
+    /*
+     * []   [[]]    [[], []]
+     * [[], 1]  [[], [1, []]]   [[], 1, [[]]]
+     *
+     */
+    private void removeEmptyList(){
+        if(nestedList.size() == 0){
+            return;
+        }
+        
+        List<NestedInteger> emptyLists = new ArrayList<NestedInteger>();
+        
+        for(int i = 0; i < nestedList.size(); i++){
+            NestedInteger ni = nestedList.get(i);
+            
+            if(!ni.isInteger()){
+                
+                removeEmptyList(ni);
+                
+                if(ni.getList().size() == 0){
+                    emptyLists.add(ni);
+                }
+            }
+        }
+        
+        for(NestedInteger ni : emptyLists){
+            nestedList.remove(ni);
+        }
+    }
+    
+    private void removeEmptyList(NestedInteger root){
+        if(root.getList().size() == 0){
+            return;
+        }
+        else{
+            List<NestedInteger> emptyLists = new ArrayList<NestedInteger>();
+            
+            for(int i = 0; i < root.getList().size(); i++){
+                NestedInteger ni = root.getList().get(i);
+            
+                if(!ni.isInteger()){
+                    removeEmptyList(ni);
+                
+                    if(ni.getList().size() == 0){
+                        emptyLists.add(ni);
+                    }
+                }
+            }
+            
+            for(NestedInteger ni : emptyLists){
+                root.getList().remove(ni);
+            }
+        }
+    }
+                
+    private static class NestedIntegerList{
+        int pos = 0, size = 0;
+        List<NestedInteger> list;
+        
+        NestedIntegerList(NestedInteger nil){
+            list = nil.getList();
+            pos = 0;
+            size = nil.getList().size();   
+        }
+    }
+}
+
+/**
+ * Your NestedIterator object will be instantiated and called as such:
+ * NestedIterator i = new NestedIterator(nestedList);
+ * while (i.hasNext()) v[f()] = i.next();
+ */
