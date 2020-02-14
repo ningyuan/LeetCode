@@ -1,0 +1,78 @@
+给定一个整数数组，编写一个函数，找出索引m和n，只要将索引区间[m,n]的元素排好序，整个数组就是有序的。注意：n-m尽量最小，也就是说，找出符合条件的
+最短序列。函数返回值为[m,n]，若不存在这样的m和n（例如整个数组是有序的），请返回[-1,-1]。
+
+示例：
+
+输入： [1,2,4,7,10,11,7,12,6,7,16,18,19]
+输出： [3,9]
+提示：
+
+0 <= len(array) <= 1000000
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/sub-sort-lcci
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public int[] subSort(int[] array) {
+        int[] ret = new int[]{-1, -1};
+        
+        if(array == null || array.length <= 1){
+            return ret;
+        }
+        
+        /*
+         * start is the index of the first num which is not the min of the rest nums on right
+         * start goes from 0 to length-1
+         *
+         * [1,2,5,3,6] start = 2
+         *
+         */
+        int start = -1;
+        
+        boolean found = false;
+        while(!found && ((++start) < array.length - 1)){
+            int min = array[start];
+        
+            for(int i = start+1; i < array.length; i++){
+                if(array[i] < min){
+                    found = true;
+                    break;
+                }
+            }
+        }
+        
+        // start is the last num, array is sorted
+        if(!found){
+            return ret;
+        }
+        else{
+            found = false;
+            
+             /*
+              * end is the index of the first num which is not the max of the rest nums on left
+              * start goes from length to start
+              *
+              * [1,2,5,3,6] end = 3
+              *
+              */
+            int end = array.length;
+            
+            while(!found && ((--end) > start)){
+                int max = array[end];
+                
+                for(int i = end-1; i >= start; i--){
+                    if(array[i] > max){
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            
+            ret[0] = start;
+            ret[1] = end;
+            
+            return ret;
+        }
+    }
+}
