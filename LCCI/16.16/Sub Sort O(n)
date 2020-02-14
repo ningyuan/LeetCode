@@ -1,0 +1,142 @@
+给定一个整数数组，编写一个函数，找出索引m和n，只要将索引区间[m,n]的元素排好序，整个数组就是有序的。注意：n-m尽量最小，也就是说，找出符合条件的
+最短序列。函数返回值为[m,n]，若不存在这样的m和n（例如整个数组是有序的），请返回[-1,-1]。
+
+示例：
+
+输入： [1,2,4,7,10,11,7,12,6,7,16,18,19]
+输出： [3,9]
+提示：
+
+0 <= len(array) <= 1000000
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/sub-sort-lcci
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public int[] subSort(int[] array) {
+        int[] ret = new int[]{-1, -1};
+        
+        if(array == null || array.length <= 1){
+            return ret;
+        }
+        
+        /*
+         * start is the index of the first num which is less than the previous num
+         * start goes from 1 to length
+         *
+         * [1,2,3,2,6] start = 3
+         * [1,2,3,4,5] start = 5
+         *
+         */
+        int start = 1;
+        
+        for(; start < array.length; start++){
+            if(array[start] < array[start-1]){
+                break;
+            }
+        }
+        
+        /* 
+         * the array is sorted
+         * [1,2,3]
+         * [1,1]
+         *
+         */
+        if(start == array.length){
+            return ret;
+        }
+        
+        /*
+         * end is the index of the first num which is greater than the next num
+         * start goes from length-1 to start-1
+         *
+         * [1,2,3,2,6] end = 2
+         * [3,1,2,3,4] end = 0
+         *
+         */
+        int end = array.length-2;
+        
+        for(; end >= start; end--){
+            if(array[end] > array[end+1]){
+                break;
+            }
+        }
+                //System.out.println("start: "+start+" end: "+end);
+        /*
+         * [1,2,3,1,2,3]    start = 3 end = 2
+         * [1,2,3,2]        start = 3 end = 2
+         * [2,1,2,3]        start = 1 end = 0
+         *
+         */
+        if(start > end){
+            ret[0] = findPosOfMaxNumLessThan(array, array[end+1], end);
+            ret[1] = findPosOfMinNumGreaterThan(array, array[start-1], start);
+                //System.out.println("ret[0]: "+ret[0]+" ret[1]: "+ret[1]);
+            return ret;
+        }
+        /*  
+         * [1,3,2,1,3]  start = 2 end = 2
+         *
+         */
+        else if(start == end){
+            int min = Math.min(array[start], array[end+1]);
+            int max = Math.max(array[start], array[start-1]);
+                //System.out.println("min in middle: "+min+" max in middle: "+max);
+            ret[0] = findPosOfMaxNumLessThan(array, min, start-1);
+            ret[1] = findPosOfMinNumGreaterThan(array, max, end+1);
+                //System.out.println("ret[0]: "+ret[0]+" ret[1]: "+ret[1]);
+            return ret;
+        }
+        /*
+         * [1,2,3,1,5,4,1,2,3]     start = 3 end = 5
+         * [1,2,3,2,3,1,2,3,3]     start = 3 end = 4
+         * 
+         */
+        else{
+            int[] minAndMax = findMinAndMaxIn(array, start, end);
+                //System.out.println("min in middle: "+minAndMax[0]+" max in middle: "+minAndMax[1]);
+            int min = Math.min(minAndMax[0], array[end+1]);
+            int max = Math.max(minAndMax[1], array[start-1]);
+            
+            ret[0] = findPosOfMaxNumLessThan(array, min, start-1);
+            ret[1] = findPosOfMinNumGreaterThan(array, max, end+1);
+                //System.out.println("ret[0]: "+ret[0]+" ret[1]: "+ret[1]);
+            return ret;
+        }
+    }
+    
+    private int findPosOfMaxNumLessThan(int[] array, int min, int start){
+        for( ; start > -1; start--){
+            if(array[start] <= min){
+                return ++start;
+            }
+        }
+        return ++start;
+    }
+    
+    private int findPosOfMinNumGreaterThan(int[] array, int max, int start){
+        for( ; start < array.length; start++){
+            if(array[start] >= max){
+                return --start;
+            }
+        }
+        return --start;
+    }
+    
+    private int[] findMinAndMaxIn(int[] array, int i, int j){
+        int max = array[i];
+        int min = max;
+        
+        for(int k = i; k <= j; k++){
+            if(array[k] > max){
+                max = array[k];
+            }
+            else if(array[k] < min){
+                min = array[k];
+            }
+        }
+        
+        return new int[]{min, max};
+    }
+}
