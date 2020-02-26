@@ -1,0 +1,84 @@
+Given an unsorted array of integers, find the length of longest increasing subsequence.
+
+Example:
+
+Input: [10,9,2,5,3,7,101,18]
+Output: 4 
+Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4. 
+Note:
+
+There may be more than one LIS combination, it is only necessary for you to return the length.
+Your algorithm should run in O(n2) complexity.
+Follow up: Could you improve it to O(n log n) time complexity?
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-increasing-subsequence
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        /*  
+         * the max sequence length from element 0 to element n
+         * 
+         * f(n) = max{ f(0)   (if n <= g(0))   f(0) + 1   (if n > g(0)),
+         *             f(1)   (if n <= g(1))   f(1) + 1   (if n > g(1)),
+         *             ...
+         *             f(n-1) (if n <= g(n-1)) f(n-1) + 1 (if n > g(n-1))}
+         *              
+         *                  
+         * the last min num of the max seqence from element 0 to n
+         * g(n) = min { g(0), g(1), ... g(n-1), n   if(f(i) = max length)}
+         *             
+         *                  
+         * 
+         *  [2,  5,  4,  7,  2,  1]
+         *    
+         * f 1   2   2   3   1   1
+         * g 2   5   4   7   2   1        
+         */
+        if(nums == null || nums.length == 0){
+            return 0;
+        }
+        
+        int n = nums.length;
+        int[] lLengthOfSub = new int[n];
+        int[] lastElement = new int[n];
+        lLengthOfSub[0] = 1;
+        lastElement[0] = nums[0];
+        
+        int max = 1;
+        for(int i = 1; i< n; i++){
+            int lLength = 1;
+            int lElement = nums[i];
+                //System.out.println("nums["+i+"]: "+nums[i]);
+            for(int j = i-1; j > -1; j--){
+    
+                if(nums[i] > lastElement[j]){
+                        //System.out.println("num["+i+"] > lastElement["+j+"]:"+lastElement[j]);
+                
+                    int l = lLengthOfSub[j] + 1;
+                    if(l > lLength){
+                        lLength = l;
+                            //System.out.println(" lLength: "+lLength+" lElement: "+nums[i]);
+                    }
+                }
+                else{
+                    if(lLength == lLengthOfSub[j]){
+                        if(lElement > lastElement[j]){
+                            lElement = lastElement[j];
+                        }
+                    }
+                }
+            }
+            
+            lLengthOfSub[i] = lLength;
+            lastElement[i] = lElement;
+            
+            if(lLength > max){
+                max = lLength;
+            }
+        }
+        
+        return max;
+    }
+}
