@@ -1,0 +1,175 @@
+You are given an n x n 2D matrix representing an image.
+
+Rotate the image by 90 degrees (clockwise).
+
+Note:
+
+You have to rotate the image in-place, which means you have to modify the input 2D matrix directly. DO NOT allocate another 
+2D matrix and do the rotation.
+
+Example 1:
+
+Given input matrix = 
+[
+  [1,2,3],
+  [4,5,6],
+  [7,8,9]
+],
+
+rotate the input matrix in-place such that it becomes:
+[
+  [7,4,1],
+  [8,5,2],
+  [9,6,3]
+]
+Example 2:
+
+Given input matrix =
+[
+  [ 5, 1, 9,11],
+  [ 2, 4, 8,10],
+  [13, 3, 6, 7],
+  [15,14,12,16]
+], 
+
+rotate the input matrix in-place such that it becomes:
+[
+  [15,13, 2, 5],
+  [14, 3, 4, 1],
+  [12, 6, 8, 9],
+  [16, 7,10,11]
+]
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/rotate-image
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public void rotate(int[][] matrix) {
+        if(matrix == null || matrix.length == 0){
+            return;
+        }
+        
+        if(matrix[0].length == 0 || matrix.length != matrix[0].length){
+            return;
+        }
+        
+        int n = matrix.length;
+        int i = 0, j = 0;
+        /*
+         *  rotate each cycle:
+         *  1   2   3   4     1   2   3   4      13    9   5   1
+         *  5   6   7   8  -> 5           8  ->  14            2  ->   6    7 ->  10    6
+         *  9  10  11  12     9          12      15            3      10   11     11    7
+         * 13  14  15  16    13  14  15  16      16   12   8   4
+         *
+         * n is the length of the current cycle
+         */
+        while(n > 1){
+                //System.out.println("cycle "+n+" i: "+i+" j:"+j);
+            for(int k = 0; k < n-1; k++){
+                    //System.out.println("rotate ("+i+", "+(j+k)+")");
+                rotateFourElement(matrix, n, i, j+k);
+            }
+            
+            i++;
+            j++;
+            n -= 2;
+        }
+    }
+    
+    private void rotateFourElement(int[][] matrix, int n, int i, int j){
+        int si = i, sj = j;
+        for(int k = 0; k < 4; k++){
+            int cNum = matrix[si][sj];
+            
+            int[] np = getPosOfNextNum(matrix.length, n, i, j);
+                //System.out.println("current ("+i+", "+j+")");
+                //System.out.println("next ("+np[0]+", "+np[1]+")");
+            int temp = matrix[np[0]][np[1]];                                                                
+            matrix[np[0]][np[1]] = cNum;
+            matrix[si][sj] = temp;
+            
+            i = np[0];
+            j = np[1];
+        }
+    }
+    
+    /*
+     * calculate the position of the next to be changed element of the element at (i, j)
+     *
+     */
+    private int[] getPosOfNextNum(int l, int n, int i, int j){
+        int[] ret = new int[2];
+        
+        int step = n - 1;
+        
+        int start = (l-n)/2, end = (l-n)/2 + n - 1;
+        
+        if(i == start){
+            while(step > 0){
+                if(j < end){
+                    j++;
+                    step--;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+            
+        if(j == end){
+            while(step > 0){
+                if(i < end){
+                    i++;
+                    step--;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        
+        if(i == end){
+            while(step > 0){
+                if(j > start){
+                    j--;
+                    step--;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        
+        if(j == start){
+            while(step > 0){
+                if(i > start){
+                    i--;
+                    step--;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        
+        if(i == start){
+            while(step > 0){
+                if(j < end){
+                    j++;
+                    step--;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        
+        ret[0] = i;
+        ret[1] = j;
+        
+        return ret;
+    }
+}
+
