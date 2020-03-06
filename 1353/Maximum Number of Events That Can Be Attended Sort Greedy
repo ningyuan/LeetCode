@@ -71,7 +71,7 @@ class Solution {
         
         /* 
          * greedy algorithm
-         * take part in the earliest meeting in the possible day
+         * take part in the earliest meeting which ends also earliest in the possible day
          *
          */
         Set<Integer> days = new HashSet<Integer>();
