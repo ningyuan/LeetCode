@@ -1,0 +1,100 @@
+Given an integer array of size n, find all elements that appear more than ⌊ n/3 ⌋ times.
+
+Note: The algorithm should run in linear time and in O(1) space.
+
+Example 1:
+
+Input: [3,2,3]
+Output: [3]
+Example 2:
+
+Input: [1,1,1,3,3,2,2,2]
+Output: [1,2]
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/majority-element-ii
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        List<Integer> ret = new ArrayList<Integer>();
+        
+        if(nums == null || nums.length == 0){
+            return ret;
+        }
+        
+        // boyer-moore
+        int candidate1 = 0, candidate2 = 0;
+        int cnt1 = 0, cnt2 = 0;
+        
+        for(int i = 0; i < nums.length; i++){
+            if(cnt1 == 0){
+                if(candidate2 == nums[i]){
+                    cnt2++;
+                        //System.out.println("num == c2   c2:"+nums[i]+" cnt2:"+cnt2);
+                }
+                else{
+                    candidate1 = nums[i];
+                    cnt1++;
+                        //System.out.println("cnt1 == 0   c1:"+nums[i]+" cnt1:"+cnt1);
+                }
+            }
+            else if(cnt2 == 0){
+                if(candidate1 == nums[i]){
+                    cnt1++;
+                        //System.out.println("num == c1   c1:"+nums[i]+" cnt1:"+cnt1);
+                }
+                else{
+                    candidate2 = nums[i];
+                    cnt2++;
+                        //System.out.println("cnt2 == 0   c2:"+nums[i]+" cnt2:"+cnt2);
+                }
+            }
+            else{
+                if(candidate1 == nums[i]){
+                    cnt1++;
+                        //System.out.println("num == c1   c1:"+nums[i]+" cnt1:"+cnt1);
+                }
+                else if(candidate2 == nums[i]){
+                    cnt2++;
+                        //System.out.println("num == c2   c2:"+nums[i]+" cnt2:"+cnt2);
+                }
+                else{
+                    cnt1--;
+                    cnt2--;
+                        //System.out.println("num:"+nums[i]+" cnt1:"+cnt1+" cnt2:"+cnt2);
+                }
+            }
+        }
+        
+            //System.out.println("num1: "+candidate1+" "+cnt1+"   num2: "+candidate2+" "+cnt2);
+        
+        boolean added = false;
+        if(cnt1 > 0 && isMajorityElement(nums, candidate1)){
+            ret.add(candidate1);
+            added = true;
+        }
+        
+        if(cnt2 > 0 && (candidate2 != candidate1 || !added) && isMajorityElement(nums, candidate2)){
+            ret.add(candidate2);
+        }
+        
+        return ret;
+    }
+    
+    private boolean isMajorityElement(int[] nums, int num){
+        int cnt = 0;
+        
+        // x > n / 3 -> x * 2 > 2n / 3
+        for(int i = 0; i < nums.length; i++){
+            if(nums[i] == num){
+                cnt += 2;
+            }
+            else{
+                cnt--;
+            }
+        }
+        
+        return cnt > 0;
+    }
+}
