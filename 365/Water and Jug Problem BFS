@@ -1,0 +1,159 @@
+You are given two jugs with capacities x and y litres. There is an infinite amount of water supply available. You need to 
+determine whether it is possible to measure exactly z litres using these two jugs.
+
+If z liters of water is measurable, you must have z liters of water contained within one or both buckets by the end.
+
+Operations allowed:
+
+Fill any of the jugs completely with water.
+Empty any of the jugs.
+Pour water from one jug into another till the other jug is completely full or the first jug itself is empty.
+Example 1: (From the famous "Die Hard" example)
+
+Input: x = 3, y = 5, z = 4
+Output: True
+Example 2:
+
+Input: x = 2, y = 6, z = 5
+Output: False
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/binary-tree-maximum-path-sum
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public boolean canMeasureWater(int x, int y, int z) {
+        Set<Integer> result = new HashSet<Integer>();
+        
+        if(z == x || z == y || z == 0){
+            return true;
+        }
+        
+        // make sure that x <= y
+        if(x > y){
+            int temp = x;
+            x = y;
+            y = temp;
+        }
+        
+        result.add(0);
+        result.add(x);
+        result.add(y);
+        
+        List<Integer> queue = new ArrayList<Integer>();
+        queue.add(x);
+        queue.add(y);
+        
+        while(!queue.isEmpty()){
+            
+            int volume = queue.remove(0);
+            int newVolume = 0;
+                //System.out.println("volume: "+volume);
+            if(volume <= x){
+                // volume + full y
+                newVolume = volume + y;
+                if(newVolume == z){
+                    return true;
+                }
+                checkVolume(result, queue, newVolume);
+                    
+                // poll y to x containing volume
+                newVolume = y - (x - volume);
+                if(newVolume == z){
+                    return true;
+                }
+                checkVolume(result, queue, newVolume);
+                    
+                // poll x to y containing volume (newVolume in y)
+                int i = 1;
+                if(x != 0){
+                    newVolume = (i * x) + volume;
+                    while(newVolume < y){
+                        if(newVolume == z){
+                            return true;
+                        }
+                        checkVolume(result, queue, newVolume);
+                        i++;
+                        newVolume = (i * x) + volume;
+                    } 
+                }
+                 
+                // poll x to y containing volume (newVolume in x)
+                i = 1;
+                if(x != 0){
+                    newVolume = (i * x) - (y - volume);
+                    while(newVolume < 0){
+                        i++;
+                        newVolume = (i * x ) - (y - volume);
+                    }
+                    if(newVolume == z){
+                        return true;
+                    }
+                    checkVolume(result, queue, newVolume);
+                }
+            }
+            else if(volume <= y){
+                // volume + full x
+                newVolume = volume + x;
+                if(newVolume == z){
+                    return true;
+                }
+                checkVolume(result, queue, newVolume);
+                
+                // poll y containing volume to x
+                newVolume = volume - x;
+                if(newVolume == z){
+                    return true;
+                }
+                checkVolume(result, queue, newVolume);
+                    
+                // poll x to y containing volume (newVolume in y)
+                int i = 2;
+                if(x != 0){
+                    newVolume = (i * x) + volume;
+                    while(newVolume < y){
+                        if(newVolume == z){
+                            return true;
+                        }
+                        checkVolume(result, queue, newVolume);
+                        i++;
+                        newVolume = (i * x) + volume;
+                    } 
+                }
+                
+                // poll x to y containing volume (newVolume in x)
+                i = 1;
+                if(x != 0){
+                    newVolume = (i * x) - (y - volume);
+                    while(newVolume < 0){
+                        i++;
+                        newVolume = (i * x ) - (y - volume);
+                    }
+                    if(newVolume == z){
+                        return true;
+                    }
+                    checkVolume(result, queue, newVolume);
+                }
+            }
+            else{
+                // poll y to x both containing volume
+                newVolume = y - ((x + y) - volume);
+                if(newVolume == z){
+                    return true;
+                }
+                checkVolume(result, queue, newVolume);
+            }
+        }
+        
+        return false;
+    }
+    
+    private void checkVolume(Set<Integer> result, List<Integer> queue, int volume){
+        if(!result.contains(volume)){
+            result.add(volume);
+                        
+            queue.add(volume);
+                //System.out.println("add new volume: "+volume);
+        }
+    }
+}
