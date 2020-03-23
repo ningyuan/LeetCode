@@ -1,0 +1,87 @@
+A message containing letters from A-Z is being encoded to numbers using the following mapping:
+
+'A' -> 1
+'B' -> 2
+...
+'Z' -> 26
+Given a non-empty string containing only digits, determine the total number of ways to decode it.
+
+Example 1:
+
+Input: "12"
+Output: 2
+Explanation: It could be decoded as "AB" (1 2) or "L" (12).
+Example 2:
+
+Input: "226"
+Output: 3
+Explanation: It could be decoded as "BZ" (2 26), "VF" (22 6), or "BBF" (2 2 6).
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/decode-ways
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public int numDecodings(String s) {
+        
+        if(s.length() == 1){
+            if(s.equals("0")){
+                return 0;
+            }
+            else{
+                return 1;
+            }
+        }
+        
+        /*
+         * f(n) = the num of decodings of string start from n to the end
+         *
+         * f(n) = 0 (s.charAt(n) == '0')
+         *        1 (n = s.length()-1 && s.charAt(s.length()-1) != '0')
+         *        f(n+1) + f(n+2) (if string start from n to n-1 < 26)
+         */
+        int[] f = new int[s.length()];
+        int num = Integer.parseInt(s.substring(s.length()-1, s.length()));
+        if(num > 0){
+            f[s.length()-1] = 1;
+        }
+        else{
+            f[s.length()-1] = 0;
+        }
+        
+        num = Integer.parseInt(s.substring(s.length()-2, s.length()-1));
+        if(num > 0){
+            num = Integer.parseInt(s.substring(s.length()-2, s.length()));
+            if(num < 27){
+                f[s.length()-2] = 1 + f[s.length()-1];
+            }
+            else{
+                f[s.length()-2] = f[s.length()-1];
+            }
+        }
+        else{
+            f[s.length()-2] = 0;
+        }
+        
+        int i = s.length()-3;
+        while(i > -1){
+            num = Integer.parseInt(s.substring(i, i+1));
+            if(num > 0){
+                num = Integer.parseInt(s.substring(i, i+2));
+                if(num < 27){
+                    f[i] = f[i+1] + f[i+2];
+                }
+                else{
+                    f[i] = f[i+1];
+                }
+            }
+            else{
+                f[i] = 0;
+            }
+            
+             i--;
+        }
+                                   
+        return f[0];
+    }
+}
