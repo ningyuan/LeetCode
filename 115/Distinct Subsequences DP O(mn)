@@ -1,0 +1,95 @@
+Given a string S and a string T, count the number of distinct subsequences of S which equals T.
+
+A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of 
+the characters without disturbing the relative positions of the remaining characters. (ie, "ACE" is a subsequence of 
+"ABCDE" while "AEC" is not).
+
+Example 1:
+
+Input: S = "rabbbit", T = "rabbit"
+Output: 3
+Explanation:
+
+As shown below, there are 3 ways you can generate "rabbit" from S.
+(The caret symbol ^ means the chosen letters)
+
+rabbbit
+^^^^ ^^
+rabbbit
+^^ ^^^^
+rabbbit
+^^^ ^^^
+Example 2:
+
+Input: S = "babgbag", T = "bag"
+Output: 5
+Explanation:
+
+As shown below, there are 5 ways you can generate "bag" from S.
+(The caret symbol ^ means the chosen letters)
+
+babgbag
+^^ ^
+babgbag
+^^    ^
+babgbag
+^    ^^
+babgbag
+  ^  ^^
+babgbag
+    ^^^
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/distinct-subsequences
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+class Solution {
+    public int numDistinct(String s, String t) {
+        if(s == null || s.length() == 0 || t == null || t.length() == 0 || s.length() < t.length()){
+            return 0;
+        }
+        
+        // info[n]: for each character in s, the num of substring started by t.charAt(n)
+        int[] info = new int[t.length()];
+            
+        /*
+         *  t: rabbit          info [0, 0, 0, 0, 0, 0]
+         *  s: rabbbit (t)          [0, 0, 0, 0, 0, 1]
+         *             (i)          [0, 0, 0, 0, 1, 1]
+         *             (b)          [0, 0, 0, 1, 1, 1]
+         *             (b)          [0, 0, 1, 2, 1, 1]
+         *             (b)          [0, 0, 3, 3, 1, 1]
+         *             (a)          [0, 3, 3, 3, 1, 1]
+         *             (r)          [3, 3, 3, 3, 1, 1]
+         *                    
+         */
+        for(int i = s.length()-1; i > -1; i--){
+            updateInfo(s.charAt(i), s.length()-i, t, info);
+        }
+        
+        return info[0];
+    }
+    
+    private void updateInfo(char c, int l, String t, int[] info){
+        int[] temp = new int[info.length];
+        System.arraycopy(info, 0, temp, 0, info.length);
+        
+        for(int i = t.length()-1; i > -1; i--){
+            if(l >= t.length()-i){
+                char target =t.charAt(i);
+            
+                if(c == target){
+                    if(i == t.length()-1){
+                        info[i] = temp[i] + 1;
+                    }
+                    else{
+                        info[i] = temp[i] + temp[i+1];
+                    }
+                }
+            }
+            else{
+                break;
+            }
+        } 
+    }
+}
