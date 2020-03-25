@@ -45,7 +45,7 @@ class Solution {
          * s1: a b c
          * s2: d e
          *
-         * de   abc ()
+         * de   a () bc
          * d    a (e bc)
          *      a (de bc)
          */
