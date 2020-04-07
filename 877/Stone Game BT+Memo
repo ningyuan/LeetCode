@@ -40,7 +40,7 @@ class Solution {
         }
         
         /*
-         * int[i][j][0, 1]: take stone from pile i to pile firstly(0) or secondly(1)
+         * int[i][j][0, 1]: take stones from pile i to pile j firstly(0) or secondly(1)
          * 0：not calculated    1: win      2: lose
          * 
          */
