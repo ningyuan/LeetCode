@@ -1,0 +1,367 @@
+(This problem is an interactive problem.)
+
+You may recall that an array A is a mountain array if and only if:
+
+A.length >= 3
+There exists some i with 0 < i < A.length - 1 such that:
+A[0] < A[1] < ... A[i-1] < A[i]
+A[i] > A[i+1] > ... > A[A.length - 1]
+Given a mountain array mountainArr, return the minimum index such that mountainArr.get(index) == target.  If such an index doesn't
+exist, return -1.
+
+You can't access the mountain array directly.  You may only access the array using a MountainArray interface:
+
+MountainArray.get(k) returns the element of the array at index k (0-indexed).
+MountainArray.length() returns the length of the array.
+Submissions making more than 100 calls to MountainArray.get will be judged Wrong Answer.  Also, any solutions that attempt to 
+circumvent the judge will result in disqualification.
+
+ 
+
+Example 1:
+
+Input: array = [1,2,3,4,5,3,1], target = 3
+Output: 2
+Explanation: 3 exists in the array, at index=2 and index=5. Return the minimum index, which is 2.
+Example 2:
+
+Input: array = [0,1,2,4,2,1], target = 3
+Output: -1
+Explanation: 3 does not exist in the array, so we return -1.
+ 
+
+Constraints:
+
+3 <= mountain_arr.length() <= 10000
+0 <= target <= 10^9
+0 <= mountain_arr.get(index) <= 10^9
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/find-in-mountain-array
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+/**
+ * // This is MountainArray's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * interface MountainArray {
+ *     public int get(int index) {}
+ *     public int length() {}
+ * }
+ */
+ 
+class Solution {
+    private int minIdx = -1;
+        
+    public int findInMountainArray(int target, MountainArray mountainArr) {
+        minIdx = -1;
+            
+        findInMountainArrayHelper(target, mountainArr, 0, mountainArr.length()-1, -1, true);
+            
+        return minIdx;
+    }
+    
+    private boolean findInMountainArrayHelper(int target, MountainArray mountainArr, int i, int j, int preNum, boolean isLeftPart) {
+            //System.out.println("i: "+i+" j: "+j+" preNum: "+preNum+" "+isLeftPart);
+        if(i < 0 || j > mountainArr.length() -1 || i > j) {
+            return false;
+        }
+        
+        if(i == j) {
+            if(mountainArr.get(i) == target) {
+                if(minIdx == -1) {
+                    minIdx = i;
+                }
+                else if(i < minIdx) {
+                    minIdx = i;
+                }
+                
+                    //System.out.println("a[i "+i+"] = target "+target);
+                return true;
+            }
+                
+            return false;
+        }
+            
+        int mid = i + (j-i) / 2;
+        int num = mountainArr.get(mid);
+            //System.out.println("a[mid "+mid+"] = "+num);
+        if(num == target) {
+            if(minIdx == -1) {
+                minIdx = mid;
+            }
+            else if(mid < minIdx) {
+                minIdx = mid;
+            }
+                //System.out.println("a[mid "+mid+"] = target "+target);
+            
+            if((mid-1) > -1) {
+                if(mountainArr.get(mid-1) > num) {
+                    findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                }
+            } 
+            
+            return true;
+        }
+        else if(num > target) {
+            if(preNum > -1) {
+                if(isLeftPart) {
+                    /* target < num < preNum
+                     *           p
+                     *      n
+                     *   ------- t
+                     */
+                    if(num < preNum) {
+                        int a = mountainArr.get(i);
+                        
+                        if(a == target) {
+                            if(minIdx == -1) {
+                                minIdx = i;
+                            }
+                            else if(i < minIdx) {
+                                minIdx = i;
+                            }
+                            
+                            return true;   
+                        }
+                        else if(a < target) {
+                                //System.out.println(target+" t<n "+num+" n<p "+preNum);
+                            return findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                    /* target < num >= preNum
+                     *      n    
+                     *           p
+                     */
+                    else {
+                        /* 
+                         *      n    
+                         *           p
+                         *   ------- t
+                         * a[i]
+                         */
+                        int a = mountainArr.get(i);
+                        
+                        if(a == target) {
+                            if(minIdx == -1) {
+                                minIdx = i;
+                            }
+                            else if(i < minIdx) {
+                                minIdx = i;
+                            }
+                            
+                            return true;   
+                        }
+                        else if(a < target) {
+                                //System.out.println(target+" t<n "+num+" n>=p "+preNum);
+                            // target < num >= preNum > target
+                            boolean ret = findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                            if(ret) {
+                                return true;
+                            }
+                        }    
+                        
+                        /* 
+                         *      n    
+                         *   ------- t
+                         *           p
+                         */
+                        if(target > preNum) {
+                                //System.out.println(num+" n>t "+target+" t>=p "+preNum);
+                            return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                        } 
+                        
+                        return false;
+                    }
+                }
+                else {
+                    /* target < num < preNum
+                     *      p    
+                     *           n
+                     *   ------- t
+                     */
+                    if(num < preNum) {
+                        int a = mountainArr.get(j);
+                        
+                        if(a == target) {
+                            if(minIdx == -1) {
+                                minIdx = j;
+                            }
+                            else if(j < minIdx) {
+                                minIdx = j;
+                            }
+                            
+                            return true;
+                        }
+                        else if(a < target) {
+                                //System.out.println(preNum+" p>n "+num+" n>t "+target);
+                            return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                        }
+                        else {
+                            return false;
+                        }  
+                    }
+                    /* target < num >= preNum
+                     *           n
+                     *      p    
+                     *  
+                     */
+                    else {
+                        /* preNum <= target < num 
+                         *       n
+                         *    ------- t
+                         *  p
+                         */
+                        if(target > preNum) {
+                                //System.out.println(preNum+" p<=t "+target+" t<n "+num);
+                            boolean ret = findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                            if(ret) {
+                                return true;
+                            }
+                        }
+                        
+                        /* preNum <= target < num 
+                         *       n
+                         *  p 
+                         *    ------- t
+                         *            a[j]
+                         */
+                        
+                        int a = mountainArr.get(j);
+                        if(a == target) {
+                            if(minIdx == -1) {
+                                minIdx = j;
+                            }
+                            else if(j < minIdx) {
+                                minIdx = j;
+                            }
+                            
+                            return true;
+                        }
+                        else if(a < target) {
+                                //System.out.println(preNum+" p<n "+num+" n>t "+target);
+                            // target < preNum < num > target
+                            return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                        }     
+                        else {
+                           return false; 
+                        } 
+                    }
+                }
+            }
+            else {
+                int pn = mountainArr.get(mid-1);
+                int ln = mountainArr.get(mid+1);
+                
+                if(pn < num && num < ln) {
+                    return findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                }
+                else if(pn > num && num > ln) {
+                    return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                }
+                else {
+                    
+                    boolean ret = findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                    if(ret) {
+                        return true;
+                    }
+                    
+                    return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                }   
+            }
+        }
+        // num < target
+        else {
+            if(preNum > -1) {
+                if(isLeftPart) {
+                    /* target > num < preNum
+                     *           p
+                     *      n
+                     */
+                    if(num < preNum) {
+                            //System.out.println(num+" n<t "+target+" t<p "+preNum);
+                        return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                    }
+                    else {
+                        /* target > num >= preNum
+                         *   ------- t
+                         *      n    
+                         *           p
+                         */
+                        if((mid-1) > -1) {
+                            if(mountainArr.get(mid-1) > num) {
+                                    //System.out.println(target+" t>n "+num+" n>=p "+preNum);
+                                // target > num >= preNum 
+                                boolean ret = findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                                if(ret) {
+                                    return true;
+                                }
+                            }
+                        }
+                       
+                        if((mid+1) < mountainArr.length()) {
+                            if(mountainArr.get(mid+1) > num) {
+                                    //System.out.println(num+" n>t "+target+" t>=p "+preNum);
+                                return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                            }
+                        }
+                        
+                        return false;
+                    }
+                }
+                else {
+                    /* preNum > num < target
+                     *     p
+                     *          n
+                     */
+                    if(num < preNum) {
+                            //System.out.println(preNum+" p>=t "+target+" t>n "+num);
+                        return findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                    }
+                    else {
+                        /* target > num >= preNum
+                         *      ------- t
+                         *         n
+                         *    p
+                         */
+                        if((mid-1) > -1) {
+                            if(mountainArr.get(mid-1) > num) {
+                                    //System.out.println(preNum+" p<=t "+target+" t>n "+num);
+                                boolean ret = findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                                if(ret) {
+                                    return true;
+                                }
+                            }
+                        }
+                        
+                        if((mid+1) < mountainArr.length()) {
+                            if(mountainArr.get(mid+1) > num) {
+                                    //System.out.println(preNum+" p<n "+num+" n>t "+target);
+                                // preNum < num < target
+                                return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                            }
+                        }
+                        
+                        return false;
+                    }
+                }
+            }
+            else {
+                int pn = mountainArr.get(mid-1);
+                int ln = mountainArr.get(mid+1);
+                
+                if(pn < num && num < ln) {
+                    return findInMountainArrayHelper(target, mountainArr, mid+1, j, num, false);
+                }
+                else if(pn > num && num > ln) {
+                    return findInMountainArrayHelper(target, mountainArr, i, mid-1, num, true);
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+    }
+}
